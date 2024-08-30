@@ -4,4 +4,5 @@ export const httpStatus = {
   BadRequest: 400,
   NotFound: 404,
   Conflict: 409,
+  InternalSeverError: 500,
 };
