@@ -61,7 +61,7 @@ export default class MeasureService {
         },
       };
     } catch (e) {
-      console.error(e);
+      // console.error(e);
       return {
         status: httpStatus.InternalSeverError,
         message: {
@@ -110,7 +110,7 @@ export default class MeasureService {
         },
       };
     } catch (e) {
-      console.error(e);
+      //console.error(e);
       return {
         status: httpStatus.InternalSeverError,
         message: {
@@ -161,7 +161,7 @@ export default class MeasureService {
         },
       };
     } catch (e) {
-      console.error(e);
+      // console.error(e);
       return {
         status: httpStatus.InternalSeverError,
         message: {
