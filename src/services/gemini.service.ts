@@ -1,5 +1,5 @@
 import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
-import { fromBuffer } from "file-type";
+import { getMimiType } from "../utils/generateImageUrl";
 
 export default class GeminiService {
   private genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
@@ -18,18 +18,12 @@ export default class GeminiService {
     return this.instance;
   }
 
-  private async generateMimiType(base64Image: string): Promise<string> {
-    const buffer = Buffer.from(base64Image, "base64");
-    const type = await fromBuffer(buffer);
-    return type ? type.mime : "";
-  }
-
   public async getMeasureFromImage(
     base64Image: string
   ): Promise<{ value: string; measure_unit: string }> {
     const prompt = `Return the value and the measure unit like { "value": measured value as a integer, "measure_unit": measure unit }.`;
 
-    const mimeType = await this.generateMimiType(base64Image);
+    const mimeType = await getMimiType(base64Image);
 
     const image = {
       inlineData: {
