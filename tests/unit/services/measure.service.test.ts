@@ -235,7 +235,7 @@ describe("MeasureService", () => {
             {
               measure_uuid: "uuid123",
               measure_datetime: date,
-              measure_type: "type1",
+              measure_type: MeasureTypes.GAS,
               has_confirmed: true,
               image_url: "http://example.com/image.jpg",
             },
