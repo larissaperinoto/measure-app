@@ -1,11 +1,12 @@
-import express, { Express, Request, Response } from "express";
+import * as express from "express";
+import "dotenv/config";
+import "reflect-metadata";
+import measureRoutes from "./routes/measure.routes";
 
-const app: Express = express();
+const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server");
-});
+app.use(measureRoutes);
 
 export default app;
