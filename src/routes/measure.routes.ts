@@ -14,6 +14,8 @@ router.get(
   controller.getMeasure.bind(controller)
 );
 
+router.get("/public/:measure_uuid", controller.getImage.bind(controller));
+
 router.post(
   "/upload",
   createMeasureValidator,
