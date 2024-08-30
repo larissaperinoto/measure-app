@@ -7,7 +7,7 @@ import {
   IsString,
   IsUUID,
 } from "class-validator";
-import { MeasureTypes } from "../../types/measure";
+import { MeasureTypes } from "../types/measure";
 
 export class CreateMeasureValidatorSchema {
   @IsBase64({ urlSafe: true }, { message: "image deve ser um base64 válido." })

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { httpStatus } from "../utils/httpStatus";
-import { MeasureTypes } from "../types/measure";
+import { MeasureTypes } from "../utils/types/measure";
 
 export async function getMeasureValidator(
   req: Request,
