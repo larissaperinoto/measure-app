@@ -183,8 +183,8 @@ router.get("/public/:measure_uuid", controller.getImage.bind(controller));
  *             examples:
  *               application/json:
  *                 value: {
- *                   "error_code": "INVALID_DATA",
- *                   "error_description": "Descrição do erro"
+ *                   "error_code": "DOUBLE_REPORT",
+ *                   "error_description": "Leitura do mês já realizada"
  *                 }
  */
 router.post(

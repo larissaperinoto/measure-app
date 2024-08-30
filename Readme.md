@@ -30,3 +30,11 @@ Caso não possua uma chave de API para a Gemini API, [clique aqui](https://ai.go
 Suba os containers com o comando abaixo
 
         docker-compose up
+
+Acesse a página de documentação no endereço abaixo
+
+        http://localhost:3001/api-docs
+
+---
+
+Desenvolvido por [Larissa Perinoto](https://www.linkedin.com/in/larissaperinoto)
