@@ -14,11 +14,14 @@ export class CreateMeasureValidatorSchema {
   @IsNotEmpty({ message: "image não deve ser null." })
   image: string;
 
-  @IsString()
+  @IsString({ message: "customer_code deve ser uma string." })
   @IsNotEmpty({ message: "customer_code não deve ser null." })
   customer_code: string;
 
-  @IsDateString()
+  @IsDateString(
+    {},
+    { message: "measure_datetime deve ser um datetime válido." }
+  )
   @IsNotEmpty({ message: "measure_datetime não deve ser null." })
   measure_datetime: Date;
 
@@ -30,11 +33,11 @@ export class CreateMeasureValidatorSchema {
 }
 
 export class ConfirmMeasureValidatorSchema {
-  @IsUUID(null, { message: "measure_uuid não deve ser um UUID válido." })
+  @IsUUID(null, { message: "measure_uuid deve ser um UUID válido." })
   @IsNotEmpty({ message: "measure_uuid não deve ser null." })
   measure_uuid: string;
 
-  @IsNumber(null, { message: "confirmed_value não deve ser um número." })
+  @IsNumber({}, { message: "confirmed_value deve ser um número." })
   @IsNotEmpty({ message: "confirmed_value não deve ser null." })
-  confirmed_value: string;
+  confirmed_value: number;
 }
