@@ -130,6 +130,7 @@ router.get("/public/:measure_uuid", controller.getImage.bind(controller));
  *             properties:
  *               image:
  *                 type: string
+ *                 description: Imagem do medido em base64
  *               customer_code:
  *                 type: string
  *               measure_datetime:
