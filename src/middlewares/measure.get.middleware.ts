@@ -13,8 +13,8 @@ export async function getMeasureValidator(
 
   if (query && !validType) {
     res.status(httpStatus.BadRequest).send({
-      error_code: "INVALID_DATA",
-      error_description: "measure_type deve ter um dos valores: WATER ou GAS.",
+      error_code: "INVALID_TYPE",
+      error_description: "Tipo de medição não permitida",
     });
   }
 
