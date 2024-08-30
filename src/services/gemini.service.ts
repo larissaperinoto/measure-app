@@ -26,8 +26,8 @@ export default class GeminiService {
 
   public async getMeasureFromImage(
     base64Image: string
-  ): Promise<{ value: string; measureUnit: string }> {
-    const prompt = `Return the value and the measure unit like { "value": measured value, "measureUnit": measure unit }.`;
+  ): Promise<{ value: string; measure_unit: string }> {
+    const prompt = `Return the value and the measure unit like { "value": measured value as a integer, "measure_unit": measure unit }.`;
 
     const mimeType = await this.generateMimiType(base64Image);
 
