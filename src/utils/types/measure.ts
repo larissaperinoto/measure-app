@@ -11,6 +11,6 @@ export type Measure = {
 };
 
 export type MeasureConfirm = {
-  measure_uuid: "string";
+  measure_uuid: string;
   confirmed_value: number;
 };
