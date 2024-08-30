@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
 import MeasureService from "../services/mesure.service";
-import * as path from "path";
-import { httpStatus } from "../utils/httpStatus";
 
 export default class MeasureController {
   private service = new MeasureService();
@@ -28,8 +26,18 @@ export default class MeasureController {
   }
 
   public async getImage(req: Request, res: Response) {
-    const measure_uuid = req.params["measure_uuid"];
-    const filePath = path.join(__dirname, "..", "..", "public", measure_uuid);
-    res.status(httpStatus.OK).sendFile(filePath);
+    const [measure_uuid, type] = req.params["measure_uuid"].split(".");
+
+    const { status, message, image } = await this.service.getImage(
+      measure_uuid
+    );
+
+    if (message) {
+      res.status(status).json(message);
+    }
+
+    res.contentType(`image/${type}`);
+
+    res.status(status).send(image);
   }
 }
