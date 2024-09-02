@@ -1,50 +1,22 @@
 import MeasureService from "src/services/mesure.service";
-import MeasureModel from "src/models/measure.model";
-import GeminiService from "../../../src/services/gemini.service";
 import { httpStatus } from "src/utils/httpStatus";
-import { generateImageUrl } from "src/utils/generateImageUrl";
+import * as generateImage from "src/utils/generateImageUrl";
 import { Measure, MeasureConfirm, MeasureTypes } from "src/utils/types/measure";
+import { mockGeminiService } from "../mocks/gemini.service.mock";
+import { mockMeasureModel } from "../mocks/measure.model.mock";
 
-jest.mock("../../../src/models/measure.model");
 jest.mock("../../../src/utils/generateImageUrl");
-jest.mock("../../../src/services/gemini.service", () => {
-  return {
-    default: {
-      getInstance: jest.fn().mockReturnValue({
-        getMeasureFromImage: jest.fn(),
-      }),
-    },
-  };
-});
 
 describe("MeasureService", () => {
   let measureService: MeasureService;
-  let findMeasureInMonthMock: jest.Mock;
-  let getMeasureFromImageMock: jest.Mock;
-  let insertMock: jest.Mock;
-  let findOneMock: jest.Mock;
-  let updateMock: jest.Mock;
-  let findMock: jest.Mock;
-  let generateImageUrlMock: jest.Mock;
 
   beforeEach(() => {
-    measureService = new MeasureService();
-
-    getMeasureFromImageMock = GeminiService.getInstance()
-      .getMeasureFromImage as jest.Mock;
-
-    findMeasureInMonthMock = MeasureModel.prototype
-      .findMeasureInMonth as jest.Mock;
-    insertMock = MeasureModel.prototype.insert as jest.Mock;
-    findOneMock = MeasureModel.prototype.findOne as jest.Mock;
-    updateMock = MeasureModel.prototype.update as jest.Mock;
-    findMock = MeasureModel.prototype.find as jest.Mock;
-    generateImageUrlMock = generateImageUrl as jest.Mock;
+    measureService = new MeasureService(mockGeminiService, mockMeasureModel);
   });
 
   describe("createMeasure", () => {
     it("should return 409 if measure already exists in the month", async () => {
-      findMeasureInMonthMock.mockResolvedValue(true);
+      mockMeasureModel.findMeasureInMonth.mockResolvedValue(true);
 
       const payload: Measure = {
         image: "base64string",
@@ -65,14 +37,16 @@ describe("MeasureService", () => {
     });
 
     it("should return 200 if measure is created successfully", async () => {
-      findMeasureInMonthMock.mockResolvedValue(null);
-      getMeasureFromImageMock.mockResolvedValue({
+      mockMeasureModel.findMeasureInMonth.mockResolvedValue(null);
+      mockGeminiService.getMeasureFromImage.mockResolvedValue({
         value: 100,
         measure_unit: "m3",
       });
 
-      insertMock.mockResolvedValue("uuid123");
-      generateImageUrlMock.mockReturnValue("http://example.com/image.jpg");
+      mockMeasureModel.insert.mockResolvedValue("uuid123");
+      jest
+        .spyOn(generateImage, "generateImageUrl")
+        .mockResolvedValue("http://example.com/image.jpg");
 
       const payload: Measure = {
         image: "base64string",
@@ -94,7 +68,9 @@ describe("MeasureService", () => {
     });
 
     it("should handle errors and return internal server error", async () => {
-      findMeasureInMonthMock.mockRejectedValue(new Error("Database error"));
+      mockMeasureModel.findMeasureInMonth.mockRejectedValue(
+        new Error("Database error")
+      );
 
       const payload: Measure = {
         image: "base64string",
@@ -119,7 +95,7 @@ describe("MeasureService", () => {
 
   describe("updateMeasure", () => {
     it("should return 404 if measure does not exist", async () => {
-      findOneMock.mockResolvedValue(null);
+      mockMeasureModel.findOne.mockResolvedValue(null);
 
       const payload: MeasureConfirm = {
         measure_uuid: "uuid123",
@@ -138,7 +114,7 @@ describe("MeasureService", () => {
     });
 
     it("should return 409 if measure has already been confirmed", async () => {
-      findOneMock.mockResolvedValue({ has_confirmed: true });
+      mockMeasureModel.findOne.mockResolvedValue({ has_confirmed: true });
 
       const payload: MeasureConfirm = {
         measure_uuid: "uuid123",
@@ -157,8 +133,8 @@ describe("MeasureService", () => {
     });
 
     it("should return 200 if measure is updated successfully", async () => {
-      findOneMock.mockResolvedValue({ has_confirmed: false });
-      updateMock.mockResolvedValue(true);
+      mockMeasureModel.findOne.mockResolvedValue({ has_confirmed: false });
+      mockMeasureModel.update.mockResolvedValue(true);
 
       const payload: MeasureConfirm = {
         measure_uuid: "uuid123",
@@ -176,7 +152,7 @@ describe("MeasureService", () => {
     });
 
     it("should handle errors and return internal server error", async () => {
-      findOneMock.mockRejectedValue(new Error("Database error"));
+      mockMeasureModel.findOne.mockRejectedValue(new Error("Database error"));
 
       const payload: MeasureConfirm = {
         measure_uuid: "uuid123",
@@ -199,7 +175,7 @@ describe("MeasureService", () => {
 
   describe("getMeasure", () => {
     it("should return 404 status if no measures are found", async () => {
-      findMock.mockResolvedValue([]);
+      mockMeasureModel.find.mockResolvedValue([]);
 
       const result = await measureService.getMeasure("customer1");
 
@@ -214,7 +190,7 @@ describe("MeasureService", () => {
 
     it("should return 200 with measures", async () => {
       const date = new Date();
-      findMock.mockResolvedValue([
+      mockMeasureModel.find.mockResolvedValue([
         {
           measure_uuid: "uuid123",
           measure_datetime: date,
@@ -223,7 +199,9 @@ describe("MeasureService", () => {
           image_base64: "base64string",
         },
       ]);
-      generateImageUrlMock.mockReturnValue("http://example.com/image.jpg");
+      jest
+        .spyOn(generateImage, "generateImageUrl")
+        .mockResolvedValue("http://example.com/image.jpg");
 
       const result = await measureService.getMeasure("customer1");
 
@@ -245,7 +223,7 @@ describe("MeasureService", () => {
     });
 
     it("should handle errors and return internal server error", async () => {
-      findMock.mockRejectedValue(new Error("Database error"));
+      mockMeasureModel.find.mockRejectedValue(new Error("Database error"));
 
       const result = await measureService.getMeasure("customer1");
 
