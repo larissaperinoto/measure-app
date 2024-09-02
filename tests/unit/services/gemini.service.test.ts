@@ -1,50 +1,46 @@
-import GeminiService from "../../../src/services/gemini.service";
+import {
+  GeminiService,
+  IGeminiService,
+} from "../../../src/services/gemini.service";
 import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
-import { getMimiType } from "../../../src/utils/generateImageUrl";
+import * as generateImage from "../../../src/utils/generateImageUrl";
 
 jest.mock("@google/generative-ai");
-jest.mock("../../../src/utils/generateImageUrl");
+
+const mockGenerateContent = jest.fn();
 
 describe("GeminiService", () => {
-  let geminiService: GeminiService;
-  let generateContentMock: jest.Mock;
-  let getMimiTypeMock: jest.Mock;
+  let service: IGeminiService;
+  let mockModel: GenerativeModel;
+  let mockGenAI: GoogleGenerativeAI;
+  const apiKey = "mock-api-key";
 
   beforeEach(() => {
-    generateContentMock = jest.fn();
-    (GoogleGenerativeAI as jest.Mock).mockImplementation(() => ({
-      getGenerativeModel: () =>
-        ({
-          generateContent: generateContentMock,
-        } as unknown as GenerativeModel),
-    }));
-
-    getMimiTypeMock = getMimiType as jest.Mock;
-
-    geminiService = GeminiService.getInstance();
+    mockGenAI = new GoogleGenerativeAI(
+      apiKey
+    ) as jest.Mocked<GoogleGenerativeAI>;
+    mockModel = {
+      generateContent: mockGenerateContent,
+    } as unknown as jest.Mocked<GenerativeModel>;
+    mockGenAI.getGenerativeModel = jest.fn().mockReturnValue(mockModel);
+    service = new GeminiService(mockGenAI);
   });
 
   describe("getMeasureFromImage", () => {
     it("should return value and measure_unit", async () => {
       const base64Image = "base64string";
       const mimeType = "image/jpeg";
-      const mockResponse = {
+      mockGenerateContent.mockResolvedValue({
         response: {
-          text: jest
-            .fn()
-            .mockReturnValue(
-              JSON.stringify({ value: "100", measure_unit: "m3" })
-            ),
+          text: () => JSON.stringify({ value: "100", measure_unit: "m3" }),
         },
-      };
+      });
+      jest.spyOn(generateImage, "getMimiType").mockResolvedValue(mimeType);
 
-      getMimiTypeMock.mockResolvedValue(mimeType);
-      generateContentMock.mockResolvedValue(mockResponse);
+      const result = await service.getMeasureFromImage(base64Image);
 
-      const result = await geminiService.getMeasureFromImage(base64Image);
-
-      expect(getMimiTypeMock).toHaveBeenCalledWith(base64Image);
-      expect(generateContentMock).toHaveBeenCalledWith([
+      expect(generateImage.getMimiType).toHaveBeenCalledWith(base64Image);
+      expect(mockGenerateContent).toHaveBeenCalledWith([
         `Return the value and the measure unit like { "value": measured value as a integer, "measure_unit": measure unit }.`,
         {
           inlineData: {
