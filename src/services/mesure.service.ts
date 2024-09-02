@@ -162,20 +162,24 @@ export default class MeasureService implements IMeasureService {
         };
       }
 
-      measures.forEach((measure) => {
-        measure["image_url"] = generateImageUrl(
+      const measuresListPromise = measures.map(async (measure) => {
+        measure["image_url"] = await generateImageUrl(
           measure.image_base64,
           measure.measure_uuid
         );
 
         delete measure["image_base64"];
+
+        return measure;
       });
+
+      const measureList = await Promise.all(measuresListPromise);
 
       return {
         status: httpStatus.OK,
         message: {
           customer_code,
-          measures,
+          measures: measureList,
         },
       };
     } catch (e) {
