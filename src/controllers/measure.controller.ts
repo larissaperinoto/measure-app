@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
-import MeasureService from "../services/mesure.service";
+import { IMeasureService } from "../services/mesure.service";
 
 export default class MeasureController {
-  private service = new MeasureService();
+  private service: IMeasureService;
+
+  constructor(service: IMeasureService) {
+    this.service = service;
+  }
 
   public async createMeasure(req: Request, res: Response) {
     const { status, message } = await this.service.createMeasure(req.body);
@@ -28,16 +32,14 @@ export default class MeasureController {
   public async getImage(req: Request, res: Response) {
     const [measure_uuid, type] = req.params["measure_uuid"].split(".");
 
-    const { status, message, image } = await this.service.getImage(
-      measure_uuid
-    );
+    const { status, message } = await this.service.getImage(measure_uuid);
 
-    if (message) {
+    if (!message["image"]) {
       res.status(status).json(message);
     }
 
     res.contentType(`image/${type}`);
 
-    res.status(status).send(image);
+    res.status(status).send(message["image"]);
   }
 }

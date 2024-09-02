@@ -1,9 +1,34 @@
-import DataSourceConnection from "../database/data-source";
+import { Repository } from "typeorm";
 import Measure from "../database/entities/Measure.entity";
 
-export default class MeasureModel {
-  private repository =
-    DataSourceConnection.getInstance().getRepository<Measure>("Measure");
+export interface IMeasureModel {
+  insert(measure: Measure): Promise<string>;
+  findOne(
+    where: Record<string, string>,
+    select?: Record<string, boolean>
+  ): Promise<Measure | undefined>;
+  find(
+    where: Record<string, string>,
+    select?: Record<string, boolean>
+  ): Promise<Measure[]>;
+  update(
+    where: Record<string, string>,
+    partialEntity: Partial<Measure>
+  ): Promise<Record<string, any>>;
+  findMeasureInMonth(
+    startOfMonth: Date,
+    endOfMonth: Date,
+    measure_type: string,
+    customer_code: string
+  ): Promise<Measure | undefined>;
+}
+
+export class MeasureModel implements IMeasureModel {
+  private repository: Repository<Measure>;
+
+  constructor(respository: Repository<Measure>) {
+    this.repository = respository;
+  }
 
   public async insert(measure: Measure): Promise<string> {
     const result = await this.repository.insert(measure);
@@ -27,7 +52,7 @@ export default class MeasureModel {
   public async update(
     where: Record<string, string>,
     partialEntity: Partial<Measure>
-  ) {
+  ): Promise<Record<string, any>> {
     return await this.repository.update(where, partialEntity);
   }
 

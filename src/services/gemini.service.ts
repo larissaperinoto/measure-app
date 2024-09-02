@@ -1,21 +1,19 @@
 import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
 import { getMimiType } from "../utils/generateImageUrl";
 
-export default class GeminiService {
-  private genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+export interface IGeminiService {
+  getMeasureFromImage: (
+    base64Image: string
+  ) => Promise<{ value: string; measure_unit: string }>;
+}
+
+export class GeminiService implements IGeminiService {
+  private genAI: GoogleGenerativeAI;
   private model: GenerativeModel;
-  public static instance: GeminiService;
 
-  constructor() {
+  constructor(genAI: GoogleGenerativeAI) {
+    this.genAI = genAI;
     this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-  }
-
-  public static getInstance() {
-    if (!this.instance) {
-      this.instance = new GeminiService();
-    }
-
-    return this.instance;
   }
 
   public async getMeasureFromImage(

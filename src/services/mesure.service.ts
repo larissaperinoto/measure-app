@@ -1,14 +1,30 @@
 import { Measure, MeasureConfirm } from "../utils/types/measure";
-import GeminiService from "./gemini.service";
-import MeasureModel from "../models/measure.model";
+import { IGeminiService } from "./gemini.service";
+import { IMeasureModel } from "../models/measure.model";
 import { httpStatus } from "../utils/httpStatus";
 import { generateImageUrl } from "../utils/generateImageUrl";
+import { ServiceResponse } from "src/utils/types/responses";
 
-export default class MeasureService {
-  private geminiService = GeminiService.getInstance();
-  private model = new MeasureModel();
+export interface IMeasureService {
+  createMeasure: (payload: Measure) => Promise<ServiceResponse>;
+  updateMeasure: (payload: MeasureConfirm) => Promise<ServiceResponse>;
+  getMeasure: (
+    customer_code: string,
+    measure_type?: string
+  ) => Promise<ServiceResponse>;
+  getImage: (measure_uuid: string) => Promise<ServiceResponse>;
+}
 
-  public async createMeasure(payload: Measure) {
+export default class MeasureService implements IMeasureService {
+  private geminiService: IGeminiService;
+  private model: IMeasureModel;
+
+  constructor(geminiService: IGeminiService, model: IMeasureModel) {
+    this.geminiService = geminiService;
+    this.model = model;
+  }
+
+  public async createMeasure(payload: Measure): Promise<ServiceResponse> {
     const { image, customer_code, measure_datetime, measure_type } = payload;
 
     try {
@@ -72,7 +88,9 @@ export default class MeasureService {
     }
   }
 
-  public async updateMeasure(payload: MeasureConfirm) {
+  public async updateMeasure(
+    payload: MeasureConfirm
+  ): Promise<ServiceResponse> {
     const { measure_uuid, confirmed_value } = payload;
 
     try {
@@ -172,7 +190,7 @@ export default class MeasureService {
     }
   }
 
-  public async getImage(measure_uuid: string) {
+  public async getImage(measure_uuid: string): Promise<ServiceResponse> {
     try {
       const data = await this.model.findOne(
         { measure_uuid },
@@ -181,7 +199,9 @@ export default class MeasureService {
 
       return {
         status: httpStatus.OK,
-        image: Buffer.from(data.image_base64, "base64"),
+        message: {
+          image: Buffer.from(data.image_base64, "base64"),
+        },
       };
     } catch (e) {
       console.error(e);

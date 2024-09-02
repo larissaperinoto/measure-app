@@ -3,10 +3,23 @@ import MeasureController from "../controllers/measure.controller";
 import { createMeasureValidator } from "../middlewares/measure.create.middleware";
 import { confirmMeasureValidator } from "../middlewares/measure.confirm.middleware";
 import { getMeasureValidator } from "../middlewares/measure.get.middleware";
+import { GeminiService } from "../services/gemini.service";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import { MeasureModel } from "../models/measure.model";
+import MeasureService from "../services/mesure.service";
+import DataSourceConnection from "../database/data-source";
+import { Repository } from "typeorm";
+import Measure from "../database/entities/Measure.entity";
 
 const router = Router();
 
-const controller = new MeasureController();
+const genAi = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
+const geminiService = new GeminiService(genAi);
+const measureRepository =
+  DataSourceConnection.getInstance().getRepository<Measure>("Measure");
+const measuremodel = new MeasureModel(measureRepository as Repository<Measure>);
+const measureService = new MeasureService(geminiService, measuremodel);
+const controller = new MeasureController(measureService);
 
 /**
  * @openapi
